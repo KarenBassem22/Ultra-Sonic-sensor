@@ -7,6 +7,7 @@
 #include "ULTRASONIC_sensor.h"
 
 /* global variables */
+uint8 g_edgeCount = 0;
 uint16 g_highTime = 0;
 
 /* function to initialize ULTRASONIC sensor */
@@ -25,15 +26,15 @@ void ULTRASONIC_init(void){
 /* function to send trigger pulse to ultra-sonic sensor */
 void Ultrasonic_Trigger(void){
 	GPIO_writePin(ULTRASONIC_TRIGGER_PORT_ID,ULTRASONIC_TRIGGER_PIN_ID,LOGIC_HIGH); /* generate trigger pulse */
-	_delay_us(10); /* delay for 10us as required */
+	_delay_ms(10); /* delay for 10us as required */
 	GPIO_writePin(ULTRASONIC_TRIGGER_PORT_ID,ULTRASONIC_TRIGGER_PIN_ID,LOGIC_LOW);  /* STOP the trigger pulse */
 }
 
 /* function to send the trigger pulse and to Start the measurements by the ICU from this moment */
 uint16 Ultrasonic_readDistance(void){
 	Ultrasonic_Trigger();
-	uint16 distance_in_cm= (g_highTime/58.8); /* high time (us) * 10^-6 * 340 (m/s) * 100 */
-	//Start the measurements by the ICU from this moment
+	uint16 distance_in_cm= (g_highTime*0.017)+2; /* high time (us) * 10^-6 * 340 (m/s) * 100 */
+	/* minus two because it can't read a distance less than 2 cm */
 	return distance_in_cm;
 }
 
@@ -49,5 +50,6 @@ void Ultrasonic_edgeProcessing(void){
 		g_highTime = ICU_getInputCaptureValue();   /* to get the High time value */
 		ICU_clearTimerValue();  /* added by me */  /* Clear the timer counter register to start measurements again */
 		ICU_setEdgeDetectionType(RISING_EDGE);     /* Detect rising edge */
+		g_edgeCount=0;
 	}
 }
