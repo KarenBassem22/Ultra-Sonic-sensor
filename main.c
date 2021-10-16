@@ -8,15 +8,17 @@
 
 int main(void){
 	LCD_init();
-	SREG|=(1<<7);
+	SREG|=(1<<7);        /* enable global interrupt */
 	ULTRASONIC_init();
 	LCD_displayString("Distance=   cm");
-	float distance=0;
+	uint16 distance=0;   /* variable to hold the distance */
 	while(1){
 
 		distance=Ultrasonic_readDistance();
+		/* to right at a specific place every time */
 		LCD_moveCursor(0,9);
 		LCD_integerToString(distance);
+		/* to display the number correctly when decreasing the distance */
 		if(distance<100){
 			LCD_displayCharacter(' ');
 		}
@@ -25,4 +27,3 @@ int main(void){
 		}
 	}
 }
-
